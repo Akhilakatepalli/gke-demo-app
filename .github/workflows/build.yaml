@@ -24,7 +24,7 @@ jobs:
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v1
         with:
-          credentials_json: ${{ secrets.AKHILA_GCP_SA_KEY }}
+          credentials_json: ${{ secrets.AHILKA_GKE_KEY }}
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
