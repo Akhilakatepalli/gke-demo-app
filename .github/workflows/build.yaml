@@ -34,9 +34,7 @@ jobs:
 
       - name: Build and push Docker image via Cloud Build
         run: |
-          gcloud builds submit . \
-            --tag ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.IMAGE }}:${{ github.sha }} \
-            --project ${{ env.PROJECT_ID }}
+          gcloud builds submit . --tag ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.IMAGE }}:${{ github.sha }} --project ${{ env.PROJECT_ID }} --suppress-logs
 
       - name: Tag image as latest
         run: |
