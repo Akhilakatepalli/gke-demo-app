@@ -32,25 +32,20 @@ jobs:
       - name: Configure Docker for Artifact Registry
         run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
-      - name: Build and push Docker image via Cloud Build
-        run: |
-          gcloud builds submit . --tag ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.IMAGE }}:${{ github.sha }} --project ${{ env.PROJECT_ID }} --suppress-logs
+      - name: Build Docker image
+        run: docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.IMAGE }}:${{ github.sha }} .
 
-      - name: Tag image as latest
+      - name: Push Docker image
         run: |
-          gcloud artifacts docker tags add \
-            ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.IMAGE }}:${{ github.sha }} \
-            ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.IMAGE }}:latest
+          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.IMAGE }}:${{ github.sha }}
+          docker tag ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.IMAGE }}:${{ github.sha }} ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.IMAGE }}:latest
+          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.IMAGE }}:latest
 
       - name: Update deployment image tag
-        run: |
-          sed -i "s|:latest|:${{ github.sha }}|g" k8s/deployment.yaml
+        run: sed -i "s|:latest|:${{ github.sha }}|g" k8s/deployment.yaml
 
       - name: Get GKE credentials
-        run: |
-          gcloud container clusters get-credentials ${{ env.CLUSTER }} \
-            --zone ${{ env.CLUSTER_ZONE }} \
-            --project ${{ env.PROJECT_ID }}
+        run: gcloud container clusters get-credentials ${{ env.CLUSTER }} --zone ${{ env.CLUSTER_ZONE }} --project ${{ env.PROJECT_ID }}
 
       - name: Deploy to GKE
         run: |
