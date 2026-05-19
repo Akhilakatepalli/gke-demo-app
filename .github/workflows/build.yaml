@@ -44,8 +44,13 @@ jobs:
       - name: Update deployment image tag
         run: sed -i "s|:latest|:${{ github.sha }}|g" k8s/deployment.yaml
 
+      - name: Install GKE auth plugin
+        run: gcloud components install gke-gcloud-auth-plugin --quiet
+
       - name: Get GKE credentials
         run: gcloud container clusters get-credentials ${{ env.CLUSTER }} --zone ${{ env.CLUSTER_ZONE }} --project ${{ env.PROJECT_ID }}
+        env:
+          USE_GKE_GCLOUD_AUTH_PLUGIN: True
 
       - name: Deploy to GKE
         run: |
